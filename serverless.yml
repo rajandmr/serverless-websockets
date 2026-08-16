@@ -1,0 +1,62 @@
+service: lambda-apigw-sockets
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: python3.12
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  websocketsApiRouteSelectionExpression: $request.body.action
+  environment:
+    CONNECTIONS_TABLE:
+      Ref: ConnectionsTable
+    POWERTOOLS_SERVICE_NAME: ${self:service}
+  logRetentionInDays: 7
+
+package:
+  patterns:
+    - "!**"
+    - "app/**"
+    - ".requirements/**"
+
+functions:
+  connect:
+    handler: app.main.connect_handler
+    role:
+      Fn::GetAtt: [ConnectionLifecycleRole, Arn]
+    events:
+      - websocket: $connect
+  disconnect:
+    handler: app.main.disconnect_handler
+    role:
+      Fn::GetAtt: [ConnectionLifecycleRole, Arn]
+    events:
+      - websocket: $disconnect
+  sendMessage:
+    handler: app.main.send_message_handler
+    role:
+      Fn::GetAtt: [BroadcastRole, Arn]
+    events:
+      - websocket: sendmessage
+  default:
+    handler: app.main.default_handler
+    role:
+      Fn::GetAtt: [ConnectionLifecycleRole, Arn]
+    events:
+      - websocket: $default
+
+resources:
+  - ${file(resources/dynamodb.yml)}
+  - Outputs:
+      WebSocketEndpoint:
+        Value:
+          Fn::Join:
+            - ""
+            - - "wss://"
+              - Ref: WebsocketsApi
+              - ".execute-api."
+              - Ref: AWS::Region
+              - "."
+              - Ref: AWS::URLSuffix
+              - "/"
+              - ${sls:stage}

@@ -1,0 +1,1 @@
+"""WebSocket Lambda application."""

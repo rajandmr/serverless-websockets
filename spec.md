@@ -1,0 +1,1 @@
+I want to build a websocket working prototype using aws apigw websockets and aws lambda. There is another project ../ecs-fargate-spot, follow the same folder structures, architectures, languages etc. Use aws-lambda-powertools for making good use of type hints. it should be python application of course.
