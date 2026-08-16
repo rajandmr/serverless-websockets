@@ -7,9 +7,18 @@ Resources:
       AttributeDefinitions:
         - AttributeName: connectionId
           AttributeType: S
+        - AttributeName: email
+          AttributeType: S
       KeySchema:
         - AttributeName: connectionId
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: EmailIndex
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
 
   ConnectionLifecycleRole:
     Type: AWS::IAM::Role
@@ -56,10 +65,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:Scan
+                  - dynamodb:Query
                   - dynamodb:DeleteItem
                 Resource:
-                  Fn::GetAtt: [ConnectionsTable, Arn]
+                  - Fn::GetAtt: [ConnectionsTable, Arn]
+                  - Fn::Sub: "${ConnectionsTable.Arn}/index/EmailIndex"
               - Effect: Allow
                 Action: execute-api:ManageConnections
                 Resource:

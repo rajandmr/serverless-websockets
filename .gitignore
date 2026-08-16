@@ -1,5 +1,4 @@
 .env
-.requirements/
 .serverless/
 .venv/
 __pycache__/
@@ -11,3 +10,6 @@ __pycache__/
 coverage/
 htmlcov/
 node_modules/
+CLAUDE.md
+plan.md
+spec.md

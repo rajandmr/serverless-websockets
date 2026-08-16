@@ -45,7 +45,7 @@
   <body>
     <main>
       <h1>Socket<br />Broadcast Tester</h1>
-      <p class="subtitle">Connect two browser tabs, send a message from either one, and watch the broadcast arrive in both.</p>
+      <p class="subtitle">Connect two browser tabs, address a message by recipient email, and watch it arrive.</p>
 
       <section class="panel" aria-label="Connection settings">
         <div class="row">
@@ -60,10 +60,12 @@
       </section>
 
       <section class="panel" aria-label="Send message">
-        <label for="message">Message</label>
-        <textarea id="message" placeholder="Write a broadcast message..." disabled></textarea>
+        <label for="recipient">Recipient email</label>
+        <input id="recipient" type="email" placeholder="who@example.com" autocomplete="off" disabled />
+        <label for="message" style="margin-top: 14px;">Message</label>
+        <textarea id="message" placeholder="Write a message..." disabled></textarea>
         <div class="row" style="justify-content: end; margin-top: 12px;">
-          <button id="send" type="button" disabled>Broadcast</button>
+          <button id="send" type="button" disabled>Send</button>
         </div>
       </section>
 
@@ -83,6 +85,7 @@
       const connectButton = document.querySelector("#connect");
       const disconnectButton = document.querySelector("#disconnect");
       const sendButton = document.querySelector("#send");
+      const recipientInput = document.querySelector("#recipient");
       const messageInput = document.querySelector("#message");
       const status = document.querySelector("#status");
       const messages = document.querySelector("#messages");
@@ -90,6 +93,7 @@
       let socket;
 
       endpoint.value = new URLSearchParams(window.location.search).get("endpoint") || localStorage.getItem("websocket-endpoint") || "";
+      recipientInput.value = new URLSearchParams(window.location.search).get("recipient") || localStorage.getItem("websocket-recipient") || "";
 
       function setStatus(text, connected) {
         status.classList.toggle("connected", connected);
@@ -97,6 +101,7 @@
         connectButton.disabled = connected;
         disconnectButton.disabled = !connected;
         sendButton.disabled = !connected;
+        recipientInput.disabled = !connected;
         messageInput.disabled = !connected;
       }
 
@@ -139,10 +144,15 @@
 
       disconnectButton.addEventListener("click", () => socket?.close());
       sendButton.addEventListener("click", () => {
+        const recipient = recipientInput.value.trim();
         const message = messageInput.value.trim();
-        if (!message) return;
-        socket.send(JSON.stringify({ action: "sendmessage", message }));
-        addLog("Broadcast sent.");
+        if (!recipient || !message) {
+          addLog("Enter a recipient email and a message.");
+          return;
+        }
+        localStorage.setItem("websocket-recipient", recipient);
+        socket.send(JSON.stringify({ action: "sendmessage", recipientEmail: recipient, message }));
+        addLog("Sent.");
         messageInput.value = "";
       });
       messageInput.addEventListener("keydown", (event) => {

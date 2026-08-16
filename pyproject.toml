@@ -1,7 +1,25 @@
 [project]
 name = "lambda-apigw-sockets"
 version = "0.1.0"
+description = "Lambda API Gateway WebSocket handler for the broadcast-chat prototype."
+readme = "README.md"
 requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+# Runtime dependencies are intentionally empty: AWS Lambda Powertools is supplied
+# at runtime by the Lambda Layer attached in serverless.yml, and boto3 ships in
+# the Lambda Python runtime. Both are listed here as dev dependencies only, so
+# local type hints, tests, and tooling resolve.
+dev-dependencies = [
+    "aws-lambda-powertools>=3,<4",
+    "boto3>=1.43.72",
+    "boto3-stubs[apigatewaymanagementapi,cognito-idp,dynamodb]>=1.43.72",
+    "mypy>=1.15.0",
+    "pydantic>=2.13.4",
+    "pytest>=8.3.4",
+    "ruff>=0.9.4",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -10,7 +28,7 @@ pythonpath = ["."]
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-extend-exclude = [".requirements"]
+force-exclude = true
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
@@ -18,7 +36,9 @@ select = ["E", "F", "I", "UP"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["app"]
+files = ["functions", "utils"]
+explicit_package_bases = true
+mypy_path = "."
 
 [[tool.mypy.overrides]]
 module = ["aws_lambda_powertools.*"]

@@ -1,0 +1,37 @@
+cognitoAuthorizer:
+  handler: functions/authorizer.handler
+  role:
+    Fn::GetAtt: [CognitoAuthorizerRole, Arn]
+
+connect:
+  handler: functions/connect.handler
+  role:
+    Fn::GetAtt: [ConnectionLifecycleRole, Arn]
+  events:
+    - websocket:
+        route: $connect
+        authorizer:
+          name: cognitoAuthorizer
+          identitySource:
+            - route.request.querystring.token
+
+disconnect:
+  handler: functions/disconnect.handler
+  role:
+    Fn::GetAtt: [ConnectionLifecycleRole, Arn]
+  events:
+    - websocket: $disconnect
+
+sendMessage:
+  handler: functions/send_message.handler
+  role:
+    Fn::GetAtt: [BroadcastRole, Arn]
+  events:
+    - websocket: sendmessage
+
+default:
+  handler: functions/default.handler
+  role:
+    Fn::GetAtt: [ConnectionLifecycleRole, Arn]
+  events:
+    - websocket: $default

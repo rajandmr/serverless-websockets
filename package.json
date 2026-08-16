@@ -6,13 +6,14 @@
     "package": "osls package",
     "deploy": "osls deploy",
     "remove": "osls remove",
-    "build:dependencies": "rm -rf .requirements && python3.12 -m pip install --target .requirements -r requirements.txt",
-    "test": "pytest",
-    "lint": "ruff check .",
-    "typecheck": "mypy app"
+    "test": "uv run pytest",
+    "lint": "uv run ruff check .",
+    "typecheck": "uv run mypy functions utils"
   },
   "devDependencies": {
-    "serverless": "3.40.0",
     "wscat": "6.1.0"
+  },
+  "dependencies": {
+    "osls": "^4.1.0"
   }
 }
